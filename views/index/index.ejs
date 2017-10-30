@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>CMS后台管理系统</title>
+    <link rel="stylesheet" href="/css/bootstrap3.min.css"/>
+
+    <link rel="stylesheet" href="/css/themes.css"/>
+    <script src="/js/jquery-1.12.4.min.js"></script>
+</head>
+<body>
+<div id="header" class="header" style="z-index: 9999;">
+    <a  class="logo pull-left"></a>
+    <div class="navbar navbar-inverse nav-bar clearfix">
+        <span style="margin-left:100px;font-size:16px;color:white;text-align:center;">CMS后台管理系统</span>
+
+
+        <!--header-right-->
+        <div class="pull-right">
+
+
+            <a class="signout pull-left" title="" id="logout" href="/users/loginout"><i class="icon-signout"></i><span
+                        class="text">退出账号</span> </a>
+        </div>
+        <!--end header-right-->
+    </div>
+</div>
+<div  class="sidebar" style="margin-top:50px;">
+    <ul class="menu">
+
+        <li class="submenu">
+            <a>
+                <i class="icon-glass"></i>
+                <span>部门管理</span>
+
+                <i class="pull-right fr-icon icon icon-chevron-down"></i>
+            </a>
+
+            <ul>
+
+                <li>
+                    <a class="jump-btn1" url="/department/list">部门列表</a>
+                </li>
+
+                <li>
+                    <a class="jump-btn1" url="/department/add">新增部门</a>
+                </li>
+
+
+            </ul>
+
+        </li>
+        <li class="submenu">
+            <a>
+                <i class="icon-list-alt"></i>
+                <span>供应商管理</span>
+                <i class="pull-right fr-icon icon icon-chevron-down"></i>
+            </a>
+            <ul>
+
+                <li>
+                    <a class="jump-btn1" url="/company/list">供应商列表</a>
+                </li>
+
+
+                <li>
+                    <a class="jump-btn1" url="/company/add">新增供应商</a>
+                </li>
+
+            </ul>
+
+        </li>
+        <li class="submenu">
+            <a>
+                <i class="icon-list-alt"></i>
+                <span>餐食管理</span>
+                <i class="pull-right fr-icon icon icon-chevron-down"></i>
+            </a>
+            <ul>
+
+                <li>
+                    <a class="jump-btn1" url="/food/list">餐食列表</a>
+                </li>
+
+
+                <li>
+                    <a class="jump-btn1" url="/food/add">新增餐食</a>
+                </li>
+
+            </ul>
+
+        </li>
+
+        <!-- 老的员工页面，应该是弃用了相关的功能和页面 -->
+        <!-- <li class="submenu">
+            <a>
+                <i class="icon-list-alt"></i>
+                <span>员工管理</span>
+                <i class="pull-right fr-icon icon icon-chevron-down"></i>
+            </a>
+            <ul>
+
+                <li>
+                    <a class="jump-btn1" url="/employee/list">员工列表</a>
+                </li>
+
+                <li>
+                    <a class="jump-btn1" url="../employee/add">新增员工</a>
+                </li>
+            </ul>
+
+        </li> -->
+
+        <!-- 新的员工管理页面，员工数据来自于点餐人员 -->
+        <li class="submenu">
+            <a>
+                <i class="icon-list-alt"></i>
+                <span>员工管理</span>
+                <i class="pull-right fr-icon icon icon-chevron-down"></i>
+            </a>
+            <ul>
+
+                <li>
+                    <a class="jump-btn1" url="/employee/emlist">查询员工</a>
+                </li>
+            </ul>
+
+        </li>
+
+        <li class="submenu">
+            <a>
+                <i class="icon-list-alt"></i>
+                <span>部门订餐统计</span>
+                <i class="pull-right fr-icon icon icon-chevron-down"></i>
+            </a>
+            <ul>
+
+                <li>
+                    <a class="jump-btn1" url="/food/detailpage">按供应商统计</a>
+                </li>
+                <li>
+                    <a class="jump-btn1" url="/food/detailAll">订餐合计</a>
+                </li>
+                <li>
+                    <a class="jump-btn1" url="/detail/memberFood">部门订餐人员统计</a>
+                </li>
+                <!--<li>-->
+                    <!--<a class="jump-btn1" url="/detail/history">历史订餐</a>-->
+                <!--</li>-->
+
+
+            </ul>
+
+        </li>
+        <li class="submenu">
+            <a>
+                <i class="icon-list-alt"></i>
+                <span>订餐时间</span>
+                <i class="pull-right fr-icon icon icon-chevron-down"></i>
+            </a>
+            <ul>
+
+                <li>
+                    <a class="jump-btn1" onclick="deleteData()">清空一周餐食数据</a>
+                </li>
+                <li>
+                    <a class="jump-btn1" url="/api/orderfooddate">订餐时间选择</a>
+                </li>
+                <li>
+                    <a class="jump-btn1" url="/api/ordernot">未定餐者统计</a>
+                </li>
+            </ul>
+
+        </li>
+        <!--<li class="submenu">-->
+            <!--<a>-->
+                <!--<i class="icon-list-alt"></i>-->
+                <!--<span>菜单管理</span>-->
+                <!--<i class="pull-right fr-icon icon icon-chevron-down"></i>-->
+            <!--</a>-->
+            <!--<ul>-->
+
+                <!--<li>-->
+                    <!--<a class="jump-btn1" url="/uploadfile">上传新菜单</a>-->
+                <!--</li>-->
+
+
+            <!--</ul>-->
+
+        <!--</li>-->
+    </ul>
+</div>
+<div class="content">
+    <iframe  frameborder="0" id="ifrm" width="100%" height="100%"></iframe>
+</div>
+</body>
+</html>
+<script>
+    $('.submenu').find('a').click(function(){
+        if(!$(this).parent().hasClass('open')){
+            $(this).parent().addClass('open').siblings().removeClass('open');
+        }
+        var node = $(this).find('i').eq(1);
+        if(node.hasClass('icon-chevron-down')){
+            node.removeClass('icon-chevron-down');
+            node.addClass('icon-chevron-up');
+            node.parent().next().slideDown();
+            // node.parents('li').siblings().find('ul').slideUp();
+
+        }else if(node.hasClass('icon-chevron-up')){
+            node.addClass('icon-chevron-down');
+            node.removeClass('icon-chevron-up');
+            node.parent().next().slideUp();
+            //  node.parents('li').siblings().find('ul').slideUp();
+        }
+    });
+
+    $('.jump-btn1').click(function(){
+        //alert($(this).attr('url'));
+        $('li').removeClass('active');
+        $(this).parent().addClass('active');
+        var url = $(this).attr('url');
+        $('#ifrm').attr('src',url);
+
+    });
+
+    function deleteData(){
+        var res=confirm('确认全部订餐数据吗？删除后将无法显示之前的订餐统计数据');
+        if(res){
+            $.ajax({
+            url:'api/deleteData',
+            success:function(data){
+                if(data.msg='success'){
+                    alert("删除成功")
+                }else{
+                    alert("删除失败")
+                }
+            }
+        })
+        }
+        
+    }
+</script>

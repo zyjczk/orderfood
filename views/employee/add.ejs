@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>新增员工</title>
+    <link rel="stylesheet" href="/stylesheets/base.css"/>
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/jquery.toast.min.css"/>
+    <script src="/js/jquery-1.12.4.min.js"></script>
+    <script src="/js/jquery.toast.min.js"></script>
+
+
+</head>
+<body>
+<div class="container" style="margin:0 auto;width:80%;">
+    所属部门：
+    <select name="" id="department" class="form-control">
+
+    </select>
+
+    员工姓名：
+    <input type="text" id="employeename" class="form-control"/> <br>
+    是否是生活委员：<input type="checkbox"  id="isWorker"/>
+    <br>
+    <button class="btn btn-primary" id="sub">新增</button>
+</div>
+</body>
+</html>
+<script>
+    $.ajax({
+        url:'/api/getDepartment',
+        success:function(data){
+            //console.log(data);
+            var html = '<option value="-1">请选择</option>';
+            for(var i=0;i<data['list'].length;i++){
+                html+='<option value="'+data['list'][i]['id']+'">'+data['list'][i]['name']+'</option>';
+                $('#department').html(html);
+            }
+        }
+    });
+
+
+
+    $('#sub').click(function () {
+        var employeename = $.trim($('#employeename').val());
+        var department = $('#department').val();
+       // alert(department);
+        var isWorker = ($('#isWorker').prop('checked')==true)? 1 : 0;
+        //alert(isWorker);
+        if (employeename && department!='-1') {
+            $.ajax({
+                url: '/employee/addAction',
+                method: 'post',
+                data: {employeename: employeename,isWorker:isWorker,departmentId:department},
+                success: function (data) {
+                    if (data['msg'] == 'success') {
+                        $.toast({text: "新增成功", position: 'mid-center'});
+                    }
+
+                },
+                error: function () {
+                    $.toast({text: "请求错误", position: 'mid-center'});
+                }
+
+            });
+        }
+
+    });
+
+</script>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的餐</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"/>
+    <link rel="stylesheet" href="../stylesheets/base.css"/>
+
+    <link rel="stylesheet" href="../css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../css/jquery.toast.min.css"/>
+    <script src="../js/jquery-1.12.4.min.js"></script>
+    <script src="../js/jquery.toast.min.js"></script>
+    <script src="../js/template.js"></script>
+</head>
+<body>
+<div class="spinner">
+    <div class="bounce1"></div>
+    <div class="bounce2"></div>
+    <div class="bounce3"></div>
+</div>
+<h1 style="text-align: center;color:darkblue;" id="dateorderfood">我的历史点餐:</h1>
+<input type="hidden" id="employeeId" value="<%= employeeId %>">
+<div id="con"></div>
+<div style="width:80%;height:100px;line-height:100px;margin:0 auto;text-align:center;">
+    <a id='orderAgain' class="btn btn-primary" onclick="reOrder()">重新订餐</a>
+    <p>友情提示:重新订餐前请截图保存本周餐品</p>
+</div>
+<div style="width:100%;height:100px;clear:both;"></div>
+
+<div class="footer">
+    <ul>
+        <li class="tab-item">
+            <a href="/wx" style="display:block;"><img src="../images/food.png" alt=""/></a>
+            <span style="display:block;width:100px;height:20px;margin:0 auto;font-size:12px;">订餐</span>
+        </li>
+        <li class="tab-item">
+            <a href="/wx/myfood?userid=<%= employeeId %>" style="display:block;"><img src="../images/my.png" alt=""/></a>
+            <span style="display:block;width:100px;height:20px;margin:0 auto;font-size:12px;">我的餐</span>
+        </li>
+    </ul>
+
+</div>
+</body>
+</html>
+<script id="datalist" type="text/html">
+    <table class="table table-striped table-responsive" style="width:80%;margin:0 auto;">
+        <thead>
+        <tr>
+            <th>星期</th>
+            <th>餐食</th>
+            <th>编号</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        {{each foodList as value}}
+        <tr>
+            <td>{{$index | weekToStr}}</td>
+            <td>{{value.foodName}}</td>
+            <td>{{value.foodId}}</td>
+        </tr>
+        {{/each}}
+        </tbody>
+
+
+    </table>
+</script>
+<script>
+    var departId = getQueryString('departid');
+    var employeeId = $('#employeeId').val(); //getQueryString('employeeid');
+    //$('.footer').find('a').eq(0).attr('href', 'order.html?departid='+departId+'&employeeid='+employeeId);
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null)
+            return decodeURIComponent(r[2]);
+        return null;
+    }
+    $.ajax({
+        url:'/api/readorderfooddate',
+        type:'get',
+        success:function(res){
+            
+            var data=res.ordertime;
+            if(data){
+
+                var timearr = data.split('-');
+                var start_timestamp = parseInt(timearr[0]);
+                var end_timestamp = parseInt(timearr[1]);
+
+                var current_timestamp = Date.parse(new Date());
+                if((current_timestamp>=start_timestamp) && (current_timestamp<=end_timestamp)){
+                    //符合时间
+                    $('#orderAgain').show();
+                }else{
+                    $('#orderAgain').hide();
+                }
+            }else{
+                    $('#orderAgain').hide();
+            }
+        }
+    })
+    $('.spinner').css('display','block');
+    $.ajax({
+        url:'/api/myfood?employeeid='+employeeId,
+        success:function(data){
+           // alert(typeof data);
+
+            if(data['list'] && data['list'].length>0){
+                if(data['list'][0]['foodList']=='null'){
+                    $('#con').html('<p style="font-size:16px;text-align:center;font-weight:bold;color:#ccc;margin-top:100px;">您还没有点餐,请去点餐~~</p>');
+                }else{
+                    $.ajax({
+                        url:'/food/queryAll',
+                        type:'get',
+                        success:function(list){
+                            // alert(JSON.stringify(data['list']));
+                            var orderfoodtime = data['list'][0]['ordertime'];
+                            $('#dateorderfood').html(orderfoodtime);
+                            var foodInfo = JSON.parse(data['list'][0]['foodList']);
+                            $.each(foodInfo,function(k1,v1){
+                                
+                                $.each(list.list,function(k2,v2){
+                                    
+                                    if(v1.foodId==v2.code){
+                                        v1.foodName=v2.name
+                                    }
+                                })
+                            })
+                            // alert(foodInfo);
+                            // alert(typeof foodInfo);
+                            var html =  template('datalist', {foodList: foodInfo});
+                            //alert(html);
+                            $('#con').html(html);
+                        }
+                    })
+                    
+                    
+
+                }
+               
+            }else{
+                $('#con').html('<p style="font-size:16px;text-align:center;font-weight:bold;color:#ccc;margin-top:100px;">您还没有点餐,请去点餐~~</p>');
+            }
+            $('.spinner').hide();
+        }
+
+    });
+
+    function reOrder(){
+        var flag = confirm("确定重新订餐？");
+        if(flag){
+            $.ajax({
+                url:'/api/delMyFood?employeeId='+employeeId,
+                success:function(data){
+                    $.ajax({
+                        url: '/api/updataFood',
+                        data: {
+                            type: 'update',
+                            employeeId: employeeId,
+                            food: 'null'
+                        },
+                        method: 'post',
+                        success:function(data){
+                            location.href = '/wx';
+                        }
+                    })
+                   
+                }
+            });
+        }
+    }
+</script>

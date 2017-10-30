@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/stylesheets/base.css"/>
+    <link rel="stylesheet" href="/stylesheets/login.css"/>
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/jquery.toast.min.css"/>
+    <script src="/js/jquery-1.12.4.min.js"></script>
+    <script src="/js/jquery.toast.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <table class="table table-striped">
+            <tr>
+                <td>部门编号</td>
+                <td>部门</td>
+                <td>操作</td>
+            </tr>
+            <% list.forEach(function(item){ %>
+            <tr>
+                <td><%= item['code'] %></td>
+                <td><%= item['name'] %></td>
+                <td>
+                    <a href="/department/edit?id=<%= item['id'] %>">修改</a>
+                    <a style="margin-left:10px" onclick="del(this)" data-id="<%= item['id'] %>">删除</a>
+                </td>
+            </tr>
+            <% }) %>
+        </table>
+    </div>
+</body>
+</html>
+<script>
+    function del(obj){
+        var id = $(obj).data('id');
+        var status = confirm('确定要删除这条数据么？');
+        if(status){
+            $.ajax({
+                url:'/department/delAction?id='+id,
+                success:function(data){
+                    if(data['msg'] == 'success'){
+                        //删除成功
+                        $.toast({text:"删除成功", position : 'mid-center'});
+                       setTimeout(function(){
+                           location.href = '/department/list';
+                       },1000);
+                    }
+                }
+            });
+        }
+    }
+</script>

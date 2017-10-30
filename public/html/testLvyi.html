@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试导出</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"/>
+    <link rel="stylesheet" href="../stylesheets/base.css"/>
+
+    <link rel="stylesheet" href="../css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../css/jquery.toast.min.css"/>
+    <script src="../js/jquery-1.12.4.min.js"></script>
+    <script src="../js/jquery.toast.min.js"></script>
+    <script src="../js/template.js"></script>
+</head>
+<body>
+    <button id='export'>点击导出文件</button>
+</body>
+</html>
+
+<script>
+    $('#export').bind('click',function(){
+        $.ajax({
+            url:'/testLvyi/excelTxt',
+            type:'get',
+            success:function(data){
+                debugger;
+            }
+        })
+    })
+</script>

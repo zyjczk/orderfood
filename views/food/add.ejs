@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>新增餐品</title>
+
+    <link rel="stylesheet" href="/stylesheets/base.css"/>
+    <link rel="stylesheet" href="/css/bootstrap3.min.css"/>
+
+    <link rel="stylesheet" href="/css/jquery.toast.min.css"/>
+
+    <script src="/js/jquery-1.12.4.min.js"></script>
+     <script src="/js/jquery.toast.min.js"></script>
+    
+</head>
+<body>
+
+<div class="container" style="margin:0 auto;width:80%;">
+    <table class="foodTable">
+        <tr>
+            <td> 选择供应商：</td>
+            <td>
+                <select style="height:30px;margin-left:5px;" name="" id="company">
+                    <option value="">请选择</option>
+                    <% list.forEach(function(item){ %>
+                        <option value="<%= item['code'] %>"><%= item['name'] %></option>
+                    <%})%>
+                </select>
+            </td>
+        </tr>
+        <!-- <tr class="weekDayTr">
+            
+            <td> 选择日期：</td>
+            <td>
+                <select name="" id="weekDay">
+                    <option value="0">请选择</option>
+                    <option value="mon">周一</option>
+                    <option value="tue">周二</option>
+                    <option value="wed">周三</option>
+                    <option value="thu">周四</option>
+                    <option value="fri">周五</option>
+                    <option value="sat">周六</option>
+                    <option value="sun">周日</option>
+                </select>
+            </td>
+        </tr> -->
+        <tr>
+            <td>餐品编号：</td>
+            <td>
+                <input type="text" id="foodCode" class="form-control"/>
+            </td>
+            <td>（如:1001-w1-a，或1002-1，请注意：所有餐品编号不得重复）</td>
+        </tr>
+        <tr>
+            <td>餐品名称：</td>
+            <td>
+                <input type="text" id="foodname" class="form-control"/>
+            </td>
+        </tr>
+    </table>
+    
+    <button class="btn btn-primary" id="sub">新增</button>
+</div>
+
+</body>
+</html>
+<script>
+    $(function(){
+        $("#sub").on("click",function(){
+        
+            var foodval=$.trim($("#foodname").val());
+            var companyId=$("#company").val();
+            // var weekDay=$("#weekDay").val();
+            var foodCode=$("#foodCode").val();
+
+            if(foodval && companyId && foodCode){
+                //查询当前code是否已经存在
+                $.ajax({
+                    url : '/food/queryOne?code='+foodCode,
+                    method : 'get',
+                    success : function(res){
+                        
+                        if(res.success){
+                            $.ajax({
+                                url: '/food/addAction',
+                                method: 'post',
+                                data: {foodval: foodval,companyId:companyId,foodCode:foodCode},
+                                success: function (data) {
+                                    if (data['msg'] == 'success') {
+                                        $.toast({text: "新增成功", position: 'mid-center'});
+                                    }
+                                },
+                                error: function () {
+                                    $.toast({text: "请求错误", position: 'mid-center'});
+                                }
+                            });
+                        }else{
+                            $.toast({text:'餐品编号已存在，请重新输入', position : 'mid-center'});
+                        }
+                    }
+                })
+            }else{
+                $.toast({text:'请完整填写供应商及餐品信息', position : 'mid-center'});
+            }
+        });
+        //云厨必须是第一个供应商，且当供应商是云厨时显示星期几的框
+        // $("#company").on("change",function(){
+        //     if($(this).val()=='1001'){
+        //         $(".weekDayTr").css("display","table-row")
+        //     }else{
+        //         $(".weekDayTr").css("display","none");
+        //         $(this).val()='';
+        //     }
+        // });
+        // $("#deleteFood").on("click",function(){
+        //     // $("#addFood").modal("show")
+        // });
+    })
+</script>
+
+<style lang="">
+    .foodTable tr{
+       height:90px;
+    }
+    .foodTable tr td{
+       text-align: right
+    }
+    /* .weekDayTr{
+        display:none
+    } */
+</style>

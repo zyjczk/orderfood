@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>订餐时间选择</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <!--<link rel="stylesheet" href="/js/My97DatePicker/skin/default/datepicker.css"/>-->
+    <script src="/js/jquery-1.12.4.min.js"></script>
+    <script src="/js/My97DatePicker/WdatePicker.js"></script>
+    <script src="/js/moment.js"></script>
+</head>
+<body>
+    <div class="container">
+        开始时间：
+        <input id="startTime" type="text" class="form-control" onClick="WdatePicker({skin:'twoer',dateFmt:'yyyy-MM-dd HH:mm:ss'})"/>
+        <br>
+        结束时间：
+        <input id="endTime" type="text"  class="form-control" onClick="WdatePicker({skin:'twoer',dateFmt:'yyyy-MM-dd HH:mm:ss'})"/>
+        <div style="width:100%;height:100px;clear:both;"></div>
+        <div>
+           <button onclick="sub()" class="btn btn-primay">修改</button>
+        </div>
+
+    </div>
+
+
+
+</body>
+</html>
+
+<script>
+   // alert(Date.parse(new Date()));
+    Date.prototype.format = function(format) {
+        var date = {
+            "M+": this.getMonth() + 1,
+            "d+": this.getDate(),
+            "h+": this.getHours(),
+            "m+": this.getMinutes(),
+            "s+": this.getSeconds(),
+            "q+": Math.floor((this.getMonth() + 3) / 3),
+            "S+": this.getMilliseconds()
+        };
+        if (/(y+)/i.test(format)) {
+            format = format.replace(RegExp.$1, (this.getFullYear() + '').substr(4 - RegExp.$1.length));
+        }
+        for (var k in date) {
+            if (new RegExp("(" + k + ")").test(format)) {
+                format = format.replace(RegExp.$1, RegExp.$1.length == 1
+                    ? date[k] : ("00" + date[k]).substr(("" + date[k]).length));
+            }
+        }
+        return format;
+    }
+    $.ajax({
+        url:'/api/readorderfooddate',
+        success:function(data){
+            //console.log(data);
+            if(data && data['ordertime']){
+                var timearr = data['ordertime'].split('-');
+                var start_timestamp = parseInt(timearr[0]);
+                var end_timestamp = parseInt(timearr[1]);
+               // console.log(moment().format('YYYY-MM-DD HH:mm:ss'));
+               // console.log(moment(start_timestamp).format('YYYY-MM-DD HH:mm:ss'));
+               // console.log(end_timestamp);
+                var start_date = moment(start_timestamp).format('YYYY-MM-DD HH:mm:ss');
+                var end_date = moment(end_timestamp).format('YYYY-MM-DD HH:mm:ss');
+                $('#startTime').val(start_date);
+                $('#endTime').val(end_date);
+
+            }
+
+        }
+    });
+
+    function sub(){
+        var timestart = $('#startTime').val();
+        var timeend = $('#endTime').val();
+        $.ajax({
+            url:'/api/writeorderfooddate',
+            method:'post',
+            data:{startime:timestart,endtime:timeend},
+            success:function(data){
+                if(data['code']=='ok'){
+                    alert('修改成功');
+                }
+            }
+        });
+    }
+
+</script>

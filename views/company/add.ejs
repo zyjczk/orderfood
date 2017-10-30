@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>新增供应商</title>
+    <link rel="stylesheet" href="/stylesheets/base.css"/>
+
+    <link rel="stylesheet" href="/css/bootstrap3.min.css"/>
+    <link rel="stylesheet" href="/css/jquery.toast.min.css"/>
+    <script src="/js/jquery-1.12.4.min.js"></script>
+    <script src="/js/jquery.toast.min.js"></script>
+
+</head>
+<body>
+<div class="container" style="margin:0 auto;width:80%;">
+    供应商编号：
+    <input type="text" id="code" class="form-control"/>（云厨只能为1001） <br>
+    供应商名称：
+    <input type="text" id="name" class="form-control"/> <br>
+    <button class="btn btn-primary" id="sub">新增</button>
+</div>
+</body>
+</html>
+<script>
+    $('#sub').click(function () {
+        var name = $.trim($('#name').val());
+        var code = $.trim($('#code').val());
+        if (name) {
+            $.ajax({
+                url: '/company/addAction',
+                method: 'post',
+                data: {name: name,code:code},
+                success: function (data) {
+                    if (data['msg'] == 'success') {
+                        $.toast({text: "新增成功", position: 'mid-center'});
+                    }
+
+                },
+                error: function () {
+                    $.toast({text: "请求错误", position: 'mid-center'});
+                }
+
+            });
+        }
+
+    });
+
+</script>

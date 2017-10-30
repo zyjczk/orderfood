@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>新增供应商</title>
+    <link rel="stylesheet" href="/stylesheets/base.css"/>
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/jquery.toast.min.css"/>
+    <script src="/js/jquery-1.12.4.min.js"></script>
+    <script src="/js/jquery.toast.min.js"></script>
+
+</head>
+<body>
+
+<div class="container" style="margin:0 auto;width:80%;">
+
+        <input type="hidden" id="departmentid" value="<%= detail.id %>">
+    供应商编号：
+        <input type="text" id="departmentcode"  class="form-control" value="<%= detail.code %>"/> <br>
+    供应商名称：
+        <input type="text" id="departmentname"  class="form-control" value="<%= detail.name %>"/> <br>
+        <button class="btn btn-primary" id="sub">修改</button>
+
+
+</div>
+
+</body>
+</html>
+<script>
+    $('#sub').click(function(){
+        var id= $.trim($('#departmentid').val());
+        var departmentname = $.trim($('#departmentname').val());
+        var departmentcode = $.trim($('#departmentcode').val());
+        if(departmentname){
+            $.ajax({
+                url:'/company/editAction',
+                method:'post',
+                data:{name:departmentname,id:id,code:departmentcode},
+                success:function(data){
+                    if(data['msg']=='success'){
+                        $.toast({text:"修改成功", position : 'mid-center'});
+                    }
+
+                },
+                error:function(){
+                    $.toast({text:"请求错误", position : 'mid-center'});
+                }
+
+            });
+        }
+
+    });
+
+</script>

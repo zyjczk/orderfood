@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/stylesheets/base.css"/>
+    <link rel="stylesheet" href="/stylesheets/login.css"/>
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/jquery.toast.min.css"/>
+    <script src="/js/jquery-1.12.4.min.js"></script>
+    <script src="/js/jquery.toast.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/template.js"></script>
+</head>
+<body>
+    <div class="container">
+        <span>请输入员工姓名: <input type="text" id="name"></span><button style="margin-left:15px" class="btn btn-primary" onclick="query()">查询</button>
+        
+        <div id='list' style="margin-top:20px">
+
+        </div>
+    </div>
+</body>
+</html>
+
+<script id="employeeList" type="text/html">
+    <table class="table table-striped">
+        <tr>
+            <td>code</td>
+            <td>名字</td>
+            <td>操作</td>
+        </tr>
+        {{each list as item  key}}
+        <tr>
+            <td>{{item.code}}</td>
+           
+            <td>{{item.name}}</td>
+            <td>
+                <button class="btn btn-danger" onclick=del({{item.code}})>删除</button>  
+            </td>
+        </tr>  
+        {{/each}}
+    </table>
+</script>
+
+<script>
+    function del(code){
+
+        var status = confirm('确定要删除这条数据么？');
+        if(status){
+            $.ajax({
+                url:'/employee/delAction?code='+code,
+                success:function(data){
+                    if(data['msg'] == 'success'){
+                        //删除成功
+                        $.toast({text:"删除成功", position : 'mid-center'});
+                       setTimeout(function(){
+                           location.href = '/employee/emlist';
+                       },1000);
+                    }
+                },
+                error:function(){
+                    $.toast({text:"删除失败", position : 'mid-center'});
+                }
+            });
+        }
+    }
+    function query(){
+        var name=$("#name").val();
+        if(name){
+            $.ajax({
+                url:'/employee/query?name='+name,
+                success:function(data){
+                    
+                    if(data && data.list && data.list.length>0){
+                        var html=template('employeeList',{list:data.list})                      
+                        $('#list').html(html);
+                    }else{
+                        $.toast({text:"未查到相关人员", position : 'mid-center'});
+                    }
+                },
+                error:function(){
+                    $.toast({text:"未查到相关人员", position : 'mid-center'});
+                }
+            })
+        }
+    }
+</script>

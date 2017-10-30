@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>不可订餐</title>
+    <style>
+        .nofood{
+            text-align:center;
+            color:#ccc;
+            font-size:20px;
+            margin-top:20px;
+        }
+        .myfood{
+
+            background:#ffb600;
+            color:#fff;
+            font-size:16px;
+            width:200px;
+            height:50px;
+            border:0;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="text-align:center;"><img src="/images/myfood.png" width="80px" height="80px"></h2>
+    <h3 class="nofood">目前不可订餐！</h3>
+    <div style="width:100%;height:100px;text-align:center;">
+        <button class="myfood" onclick="myfood()">
+            我的餐
+        </button>
+    </div>
+
+</body>
+</html>
+<script>
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return decodeURIComponent(r[2]); return null;
+    }
+    var userid = getQueryString('userid');
+    //alert(userid);
+    function myfood(){
+        location.href = '/wx/myfood?userid='+userid;
+    }
+</script>

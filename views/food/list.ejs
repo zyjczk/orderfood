@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>餐食列表</title>
+    <link rel="stylesheet" href="/stylesheets/base.css"/>
+    <link rel="stylesheet" href="/stylesheets/login.css"/>
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/jquery.toast.min.css"/>
+    <script src="/js/jquery-1.12.4.min.js"></script>
+    <script src="/js/jquery.toast.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/template.js"></script>
+</head>
+<body>
+    <div class="container">
+        <sqan style="color:red;font-size:24px">供应商: </sqan><select style="height:25px;margin-left:5px;margin-bottom:10px;" name="" id="company" onchange="selectCompany()">
+            <option value="">请选择</option>
+            <% list.forEach(function(item){ %>
+                <option value="<%= item['code'] %>"><%= item['name'] %></option>
+            <%})%>
+        </select>
+        <div id="food">
+            <span style="font-size:30px;display:inline-block;margin-top:20px;">请选择供应商</span>
+        </div>
+       
+        <button style="width:30%;font-size:20px;margin-left:25%"  onclick="addfood()">新 增</button>
+    </div>
+</body>
+</html>
+
+<script id="foodlist" type="text/html">
+    <table class="table table-striped">
+        <tr>
+            <td>ID</td>
+            <td>餐品名称</td>
+            <td>餐品编号</td>
+            <td>操作</td>
+        </tr>
+        {{each foodList as item key}}
+            <tr>
+                <td>{{key+1}}</td>
+                <td>{{item['name']}}</td>
+                <td>{{item['code']}}</td>
+                <td>
+                    <a href="/food/edit?id={{item['id']}}">修改</a>
+                    <a style="margin-left:10px" onclick="del(this)" data-id="{{item['id']}}">删除</a>
+                </td>
+            </tr>
+        {{/each}}
+    </table>
+</script>
+
+<script>
+    function del(obj){
+        var id = $(obj).data('id');
+        var status = confirm('确定要删除这条数据么？');
+        if(status){
+            $.ajax({
+                url:'/food/delAction?id='+id,
+                success:function(data){
+                    if(data['msg'] == 'success'){
+                        //删除成功
+                        $.toast({text:"删除成功", position : 'mid-center'});
+                       setTimeout(function(){
+                           location.href = '/food/list';
+                       },1000);
+                    }
+                }
+            });
+        }
+    }
+    function addfood(){
+        window.location.href="/food/add";
+    }
+    function selectCompany(){
+        var id=$("#company").val()
+        if(id){
+            $.ajax({
+                url:'/food/query?companyId='+id,
+                type:'get',
+                success:function(data){
+                    
+                    var html = template('foodlist',{foodList:data['list']});
+                    $('#food').html(html);
+                }
+            })
+        }
+        
+    }
+</script>

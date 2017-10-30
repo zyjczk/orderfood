@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>微信入口</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"/>
+    <link rel="stylesheet" href="../stylesheets/base.css"/>
+
+    <link rel="stylesheet" href="../css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../css/jquery.toast.min.css"/>
+    <script src="../js/jquery-1.12.4.min.js"></script>
+    <script src="../js/jquery.toast.min.js"></script>
+</head>
+<body>
+<div class="container" style="margin:0 auto;width:50%;margin-top:100px;">
+    所属部门：
+    <select name="" id="department" class="form-control">
+
+    </select>
+
+    <span onClick="test()">员工姓名：</span>     
+    <input type="text" id="employeename" class="form-control"/> <br>
+
+    <button class="btn btn-primary form-control"  id="sub">提交</button>
+</div>
+</body>
+</html>
+<script>
+
+    $.ajax({
+        url:'/api/getDepartment',
+        success:function(data){
+            console.log(data);
+            var html = '<option value="-1">请选择</option>';
+            for(var i=0;i<data['list'].length;i++){
+                html+='<option value="'+data['list'][i]['id']+'">'+data['list'][i]['name']+'</option>';
+                $('#department').html(html);
+            }
+        }
+    })
+
+
+    $('#sub').click(function () {
+        var employeename = $.trim($('#employeename').val());
+        var department = $('#department').val();
+        // alert(department);
+        //alert(isWorker);
+        if (employeename && department!='-1') {
+            $.ajax({
+                url: '/api/employeeAuth',
+                method: 'post',
+                data: {employeename: employeename,departmentId:department},
+                success: function (data) {
+                    if (data['msg'] == 'success') {
+                        $.toast({text: "成功", position: 'mid-center'});
+                        location.href = 'order.html?departid='+department+'&employeeid='+data['employeeId'];
+                    }else{
+                        $.toast({text: "对不起，您没有权限订餐", position: 'mid-center'});
+                    }
+
+                },
+                error: function () {
+                    $.toast({text: "数据错误", position: 'mid-center'});
+                }
+
+            });
+        }
+
+    });
+    </script>

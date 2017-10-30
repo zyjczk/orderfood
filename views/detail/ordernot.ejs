@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>未定餐统计</title>
+    <link rel="stylesheet" href="/stylesheets/base.css"/>
+    <link rel="stylesheet" href="/stylesheets/login.css"/>
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/jquery.toast.min.css"/>
+    <script src="/js/jquery-1.12.4.min.js"></script>
+    <script src="/js/jquery.toast.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/template.js"></script>
+</head>
+<body>
+<input id="employeedata" type="hidden" value="<%=JSON.stringify(allemployee)%>">
+<input id="fooddata" type="hidden" value="<%=JSON.stringify(allfood)%>">
+<div id="food"></div>
+
+<button class='btn btn-success' onclick="sendMessage()"  href="#">通知未订餐人</button>
+</body>
+</html>
+
+<script id="foodlist" type="text/html">
+    <table class="table table-striped">
+        <tr>
+            <td>ID</td>
+            <td>姓名</td>
+            <td>编号</td>
+
+        </tr>
+        {{each foodList as item key}}
+        <tr>
+            <td>{{key+1}}</td>
+            <td>{{item['name']}}</td>
+            <td>{{item['code']}}</td>
+
+        </tr>
+        {{/each}}
+    </table>
+</script>
+
+<script>
+    Array.prototype.unique1 = function(){
+        var res = [this[0]];
+        for(var i = 1; i < this.length; i++){
+            var repeat = false;
+            for(var j = 0; j < res.length; j++){
+                if(this[i] == res[j]){
+                    repeat = true;
+                    break;
+                }
+            }
+            if(!repeat){
+                res.push(this[i]);
+            }
+        }
+        return res;
+    }
+    Array.prototype.diff = function(a) {
+        return this.filter(function(i) {return a.indexOf(i) < 0;});
+    };
+    //[1,2].diff([1]);//[2]
+    var employee = $.trim($('#employeedata').val());
+    var food = $.trim($('#fooddata').val());
+    if(employee){
+        var employeedata = JSON.parse(employee);
+    }
+    if(food){
+        var fooddata = JSON.parse(food);
+    }
+    console.log(employeedata);
+    console.log(fooddata);
+    var arr_employee = [];
+    var arr_food = [];
+    var finaldata = [];
+    for(var i=0;i<employeedata.length;i++){
+        arr_employee.push(employeedata[i]['code']);
+    }
+    for(var j=0;j<fooddata.length;j++){
+        arr_food.push(fooddata[j]['employeeId']);
+    }
+
+
+    arr_employee = arr_employee.unique1();
+    arr_food = arr_food.unique1();
+    console.log(arr_employee);
+    console.log('allfood>>',arr_food);
+    var minus_arr = arr_employee.diff(arr_food);
+    console.log('差集：',minus_arr);
+    
+    console.log('employeedata',employeedata);
+
+
+        for(var m=0;m<employeedata.length;m++){
+
+            for(var k=0;k<minus_arr.length;k++){
+            if(minus_arr[k] == employeedata[m]['code']){
+                finaldata.push(employeedata[m]);
+
+            }
+        }
+    }
+    console.log(finaldata);
+    var html = template('foodlist',{foodList:finaldata});
+    $('#food').html(html);
+
+    var memberList=minus_arr
+
+    //测试
+    var sendMessage=function(){
+        
+            $.ajax({
+                    url:'/wx/sendmessage',
+                    data:{'memberList':JSON.stringify(memberList)},
+                    method:'post',
+                    success:function(res){
+                        
+                        $.toast({text: "发送成功", position: 'mid-center'});
+                    }
+            })
+    }
+</script>

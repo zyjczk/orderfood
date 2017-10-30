@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>jquery文件上传插件</title>
+    <script src="./jquery.min.js"></script>
+    <script src="jquery.ui.widget.js"></script>
+    <script src="jquery.iframe-transport.js"></script>
+    <script src="jquery.fileupload.js"></script>
+</head>
+
+<body>
+    <input type="file" name="files" id="file_upload">
+    <br>
+    <div id="imgdiv"><img src="" alt="" /></div>
+</body>
+
+</html>
+<script>
+    //官方文档：https://github.com/blueimp/jQuery-File-Upload/wiki/API
+    //中文说明：http://www.jq22.com/jquery-info230
+    //实例：http://blog.csdn.net/xiongxianhe/article/details/24110057
+
+    $('#file_upload').fileupload({
+        //autoUpload:false,//是否自动上传
+        dataType: 'json',
+        url: "a.php", //上传地址，将name=files[]传入后台。
+        done: function (e, data) {
+            
+            $('img').attr('src', data.result.path).attr('style', 'width:200px;height:200px;') ;
+
+        }
+
+    });
+</script>

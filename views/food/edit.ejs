@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>新增员工</title>
+    <link rel="stylesheet" href="/stylesheets/base.css"/>
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/jquery.toast.min.css"/>
+    <script src="/js/jquery-1.12.4.min.js"></script>
+    <script src="/js/jquery.toast.min.js"></script>
+
+</head>
+<body>
+
+<div class="container" style="margin:0 auto;width:80%;">
+
+        <input type="hidden" id="foodid" value="<%= detail.id %>">
+        餐品名称：
+        <input type="text" id="foodname"  class="form-control" value="<%= detail.name %>"/> <br>
+        餐品编号：
+        <input type="text" id="foodcode"  class="form-control" value="<%= detail.code %>"/> <br>
+        <button class="btn btn-primary" id="sub">修改</button>
+
+</div>
+
+</body>
+</html>
+<script>
+    $('#sub').click(function(){
+        var id= $.trim($('#foodid').val());
+        var foodname = $.trim($('#foodname').val());
+        var foodcode = $.trim($('#foodcode').val());
+        if(foodname){
+            $.ajax({
+                url:'/food/editAction',
+                method:'post',
+                data:{name:foodname,id:id,code:foodcode},
+                success:function(data){
+                    if(data['msg']=='success'){
+                        $.toast({text:"修改成功", position : 'mid-center'});
+                    }
+
+                },
+                error:function(){
+                    $.toast({text:"请求错误", position : 'mid-center'});
+                }
+
+            });
+        }
+
+    });
+
+</script>

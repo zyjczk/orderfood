@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>订餐</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"/>
+    <link rel="stylesheet" href="../stylesheets/base.css"/>
+
+    <link rel="stylesheet" href="../css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../css/jquery.toast.min.css"/>
+    <script src="../js/jquery-1.12.4.min.js"></script>
+    <script src="../js/jquery.toast.min.js"></script>
+    <script src="../js/template.js"></script>
+</head>
+<body>
+<div class="container">
+    <img src="" alt="" id="menu" width="100%" height="600px"> <br>
+    <div style="width:100%;height:50px;clear:both;"></div>
+    <div class="width:100%;">
+        <select class="form-control" style="width:40%;float:left;" name="status" onchange="chooseStatus(this,this.options[this.options.selectedIndex].value)">
+            <option value="common">一般</option>
+            <option value="special">特殊</option>
+
+        </select>
+
+        <select class="form-control" style="width:40%;float:right;" name="floor" id="floor" onchange="chooseFloor(this,this.options[this.options.selectedIndex].value)">
+            <option value="-1">请选择楼层</option>
+            <option value="2">二层</option>
+            <option value="4">四层</option>
+            <option value="5">五层</option>
+            <option value="6">六层</option>
+        </select>
+    </div>
+    <div style="width:100%;height:20px;clear:both;"></div>
+    <div id="con"></div>
+    <br>
+    <button class="btn btn-primary form-control" id="sub">提交</button>
+</div>
+<div style="width:100%;height:100px;clear:both;"></div>
+<div class="footer">
+    <ul>
+        <li class="tab-item">
+            <a style="display:block;" onclick="location.reload()"><img src="../images/food.png" alt=""/></a>
+            <span style="display:block;width:100px;height:20px;margin:0 auto;font-size:12px;">订餐</span>
+        </li>
+        <li class="tab-item">
+            <a style="display:block;" href="/html/myorder.html"><img src="../images/my.png" alt=""/></a>
+            <span style="display:block;width:100px;height:20px;margin:0 auto;font-size:12px;">我的餐</span>
+        </li>
+    </ul>
+
+</div>
+
+
+</body>
+</html>
+<script id="datalist" type="text/html">
+    {{each list as value}}
+
+    <span class="week" style="color:darkred;font-size:16px;display:inline-block;height:50px;width:100px;line-height:50px;">{{value['week'] | weekToStr}}:</span>
+
+    <select name="food" class="form-control" data-week="{{value['week']}}" onchange="chooseFood(this,this.options[this.options.selectedIndex].value)">
+        <option value="-1">请选择</option>
+        {{each value['foodList'] as food}}
+        <option value="{{food['id']}}">{{food['name']}}</option>
+        {{/each}}
+    </select>
+    <br>
+    <select name="soup" class="form-control" data-week="{{value['week']}}" onchange="chooseSoup(this,this.options[this.options.selectedIndex].value)">
+        <option value="-1">请选择</option>
+        {{each value['soup'] as soup key}}
+        <option value="{{key}}">{{soup}}</option>
+        {{/each}}
+    </select>
+    {{/each}}
+</script>
+<script>
+    var departId = getQueryString('departid');
+    var employeeId = getQueryString('employeeid');
+    $('.footer').find('a').eq(1).attr('href', 'myorder.html?employeeid='+employeeId);
+     var arr = ['mon','tues','wed','thur','fri','sat','sun'];
+    //var weekarr = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+
+    var soup = ['酸奶', '饮料', '汤'];
+    var obj = {};
+    var chooseObj = {};
+    var data =null;
+    $.ajax({
+        url: '/api/getMenuPic',
+        success: function (datainfo) {
+
+            $('#menu').attr('src', datainfo['picUrl']);
+
+            console.log(obj);
+           // var html = template('datalist', {list: obj});
+           // $('#con').html(html);
+            // console.log(html);
+            data = datainfo;
+            render(arr,obj,data);
+        }
+    });
+     function getQueryString(name) {
+         var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+         var r = window.location.search.substr(1).match(reg);
+         if (r != null)
+             return decodeURIComponent(r[2]);
+         return null;
+     }
+     function chooseStatus(o,v){
+        if(v == "special"){
+            $('#floor').hide();
+            arr = ['mon','tues','wed','thur','fri','sat','sun'];
+            render(arr,obj,data);
+        }else{
+            $('#floor').show();
+        }
+    }
+     function chooseFloor(o,v){
+         if(v == "2" || v=="4"){
+
+             arr = ['mon','tues','thur'];
+             render(arr,obj,data);
+         }else if(v == "5" || v=="6"){
+             arr = ['mon','wed','fri'];
+             render(arr,obj,data);
+         }
+     }
+    function chooseFood(o,foodId) {
+        console.log(foodId);
+        var week =  $(o).data('week');
+
+        if(!chooseObj[week])
+            chooseObj[week] = {};
+        chooseObj[week]['food'] = foodId;
+    }
+    function chooseSoup(o,soupId) {
+        console.log(soupId);
+        var week =  $(o).data('week');
+        if(!chooseObj[week])
+            chooseObj[week] = {};
+        chooseObj[week]['soup'] = soupId;
+    }
+    function render(arr,obj,data){
+        obj = {};
+        $('#con').html('');
+        for (var i = 0; i < arr.length; i++) {
+
+            obj[i] = {};
+            obj[i]['week'] = arr[i];
+            obj[i]['foodList'] = data['foodList'];
+            obj[i]['soup'] = soup;
+
+        }
+
+        var html = template('datalist', {list: obj});
+        $('#con').html(html);
+        //console.log(html);
+    }
+    $('#sub').click(function () {
+        //console.log(chooseObj);
+
+
+        var count = 0;
+        if($.isEmptyObject(chooseObj)){
+            alert('请选择餐食');
+            return false;
+        }else{
+            for(var key in chooseObj){
+               // console.log(chooseObj[key]['food']);
+                if(chooseObj[key]['food'] && chooseObj[key]['soup']){
+
+                    if(chooseObj[key]['food']!='-1' && chooseObj[key]['soup']!='-1'){
+                        count++;
+                    }else{
+                        alert('请正确对待');
+                        return false;
+                    }
+                }else{
+                    alert('请正确对待');
+                    return false;
+                }
+
+            }
+            if(count <arr.length){
+                alert('选择餐食不够');
+                return false;
+            }else{
+                console.log(chooseObj);
+
+                $.ajax({
+                    url:'/api/orderFood',
+                    data:{departId:departId,employeeId:employeeId,food:JSON.stringify(chooseObj)},
+                    method:'post',
+                    success:function(data){
+                        console.log(data);
+                        if(data['msg'] =='success'){
+                            alert('订餐成功');
+                            location.href = 'myorder.html?employeeid='+employeeId+'&departid='+departId;
+                        }
+                    }
+                });
+            }
+
+        }
+
+
+
+
+    });
+</script>
