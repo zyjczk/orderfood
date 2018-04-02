@@ -1,57 +1,83 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><%= title %></title>
-    <link rel="stylesheet" href="/stylesheets/base.css"/>
-    <link rel="stylesheet" href="/stylesheets/login.css"/>
-    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="/css/jquery.toast.min.css"/>
+    <title>
+        <%= title %>
+    </title>
+    <link rel="stylesheet" href="/stylesheets/base.css" />
+    <link rel="stylesheet" href="/stylesheets/login.css" />
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/jquery.toast.min.css" />
     <script src="/js/jquery-1.12.4.min.js"></script>
     <script src="/js/jquery.toast.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/template.js"></script>
 
 </head>
+
 <body>
-<div class="container">
-    <input style="display:none" type="text" id="weekNum" value="mon">
+    <div class="container">
+        <input style="display:none" type="text" id="weekNum" value="mon">
 
-    <div id="company">
+        <p>
+            <sqan style="color:red;font-size:24px">请选择供应商: </sqan>
+            <select name="orderTypeSelect" id="orderTypeSelect" onchange="chooseOrderType()">
+                <option value="1">午餐</option>
+                <option value="2">晚餐</option>
+            </select>
+        </p>
+
+        <div id="company">
+
+        </div>
+        <p></p>
+        <div>
+            <ul class="nav nav-tabs dayList">
+                <li>
+                    <a onclick="selectCompany('mon')" data-toggle="tab">周一</a>
+                </li>
+                <li>
+                    <a onclick="selectCompany('tue')" data-toggle="tab">周二</a>
+                </li>
+                <li>
+                    <a onclick="selectCompany('wed')" data-toggle="tab">周三</a>
+                </li>
+                <li>
+                    <a onclick="selectCompany('thu')" data-toggle="tab">周四</a>
+                </li>
+                <li>
+                    <a onclick="selectCompany('fri')" data-toggle="tab">周五</a>
+                </li>
+                <li>
+                    <a onclick="selectCompany('sat')" data-toggle="tab">周六</a>
+                </li>
+                <li>
+                    <a onclick="selectCompany('sun')" data-toggle="tab">周日</a>
+                </li>
+            </ul>
+        </div>
+        <div id="food">
+
+        </div>
+        <a class='btn btn-success' id="download" onclick="clickDownload(this)" download="按供应商统计.csv" href="#">导出本日数据</a>
+
 
     </div>
-    <p></p>
-    <div>
-        <ul class="nav nav-tabs dayList">
-            <li><a onclick="selectCompany('mon')" data-toggle="tab">周一</a></li>
-            <li><a onclick="selectCompany('tue')" data-toggle="tab">周二</a></li>
-            <li><a onclick="selectCompany('wed')" data-toggle="tab">周三</a></li>
-            <li><a onclick="selectCompany('thu')" data-toggle="tab">周四</a></li>
-            <li><a onclick="selectCompany('fri')" data-toggle="tab">周五</a></li>
-            <li><a onclick="selectCompany('sat')" data-toggle="tab">周六</a></li>
-            <li><a onclick="selectCompany('sun')" data-toggle="tab">周日</a></li>
-        </ul>
-    </div>
-    <div id="food">
-
-    </div>
-    <a class='btn btn-success' id="download" onclick="clickDownload(this)" download="按供应商统计.csv" href="#">导出本日数据</a>
-
-
-</div>
 </body>
+
 </html>
 
 <script id="companylist" type="text/html">
     <sqan style="color:red;font-size:24px">请选择供应商: </sqan>
     <select style="height:30px;margin-left:5px;" name="" id="selectCompany" onChange="selectCompany()">
-            <option value="">请选择</option>
-            {{each companyList as item  key}}
-                <option value="{{item.code}}">{{item.name}}</option>
-            {{/each}}
+        <option value="">请选择</option>
+        {{each companyList as item key}}
+        <option value="{{item.code}}">{{item.name}}</option>
+        {{/each}}
     </select>
 </script>
 
@@ -59,26 +85,26 @@
     <table class="table table-striped">
         <tr>
             <td>部门</td>
-            {{each dataList.foodList as item1  key}}
+            {{each dataList.foodList as item1 key}}
             <td>{{item1.name}}</td>
             {{/each}}
             <td>合计</td>
         </tr>
-        {{each dataList.orderList as item2  key}}
+        {{each dataList.orderList as item2 key}}
         <tr>
             <td>{{item2.departName}}</td>
-            {{each dataList.foodList as item3  key}}
+            {{each dataList.foodList as item3 key}}
             <td>{{item2[item3.code]||0}}</td>
             {{/each}}
             <td>{{item2.sum}}</td>
-        </tr>  
+        </tr>
         {{/each}}
         <tr>
             <td>合计</td>
-            {{each dataList.foodList as item4  key}}
+            {{each dataList.foodList as item4 key}}
             <td style='color:red'>{{dataList.sumAllData[item4.code]||0}}</td>
             {{/each}}
-            
+
             <td style='color:red'>{{dataList.sum}}</td>
         </tr>
     </table>
@@ -86,16 +112,16 @@
 
 
 <script>
-
-    function selectCompany(weekDay){
-        
-        var companyId=$("#selectCompany").val();
+    function selectCompany(weekDay) {
+        var companyId = $("#selectCompany").val();
         //首次进入时选择供应商默认取周一，之后点击日期后更新input框的日期值
-        if(!weekDay){
-            weekDay=$("#weekNum").val();
-        }else{
+        if (!weekDay) {
+            weekDay = $("#weekNum").val();
+        } else {
             $("#weekNum").val(weekDay);
         }
+
+        var orderType = $("#orderTypeSelect").val();
         // //云厨判断
         // if(companyId!=1001){
         //     weekDayOrder=0
@@ -106,95 +132,106 @@
         // weekDayOrder=weekDay || 0
         //获取订餐信息数据
         $.ajax({
-            url:'/detail/queryOrder?companyId='+companyId+"&weekDay="+weekDay,
-            type:'get',
-            success:function(data){
-                // debugger;
+            url: '/detail/queryOrder?companyId=' + companyId + "&weekDay=" + weekDay + "&orderType=" +
+                orderType,
+            type: 'get',
+            success: function (data) {
                 //获取餐品列表
+                if (data.code == -1) {
+                    $.toast({
+                        text: "查询失败，无订餐信息",
+                        position: 'mid-center'
+                    });
+                    $('#food').html("");
+                }
                 $.ajax({
-                    url:'/food/query?companyId='+companyId,
-                    type:'get',
-                    success:function(res){
+                    url: '/food/query?companyId=' + companyId,
+                    type: 'get',
+                    success: function (res) {
                         //计算每一项的合计
-                        var sum=0;
-                        var sumAllData={};
-                        for(var i=0;i<data.list.length;i++){
-                            sum+=parseInt(data.list[i].sum);
-                            var departmentList=data.list[i];
-                            $.each(departmentList,function(v,k){
-                                
-                                if(parseInt(k)){
-                                    
-                                    if(sumAllData[v]){
-                                        sumAllData[v]+=parseInt(k)
-                                    }else{
-                                        sumAllData[v]=parseInt(k);
+                        var sum = 0;
+                        var sumAllData = {};
+                        for (var i = 0; i < data.list.length; i++) {
+                            sum += parseInt(data.list[i].sum);
+                            var departmentList = data.list[i];
+                            $.each(departmentList, function (v, k) {
+
+                                if (parseInt(k)) {
+
+                                    if (sumAllData[v]) {
+                                        sumAllData[v] += parseInt(k)
+                                    } else {
+                                        sumAllData[v] = parseInt(k);
                                     }
                                 }
                             })
                         }
-                        
-                        var dataList={
-                            foodList:res.list,
-                            orderList:data.list,
-                            sum:sum,
-                            sumAllData:sumAllData
+
+                        var dataList = {
+                            foodList: res.list,
+                            orderList: data.list,
+                            sum: sum,
+                            sumAllData: sumAllData
                         }
 
-                        var html = template('foodlist',{dataList:dataList});
+                        var html = template('foodlist', {
+                            dataList: dataList
+                        });
                         $('#food').html(html);
                     }
                 })
             }
         });
-        
+
 
     }
 
     //获取供应商列表
     $.ajax({
-        url:'/company/listapi',
-        success:function(data){
-            var html = template('companylist',{companyList:data['list']});
+        url: '/company/listapi',
+        success: function (data) {
+            var html = template('companylist', {
+                companyList: data['list']
+            });
             $('#company').html(html);
         }
     });
 
     //导出excel数据
-    function clickDownload(aLink){
+    function clickDownload(aLink) {
 
-        var companyName=$("#selectCompany").val();
-        var trList=$("#food table tr");
-        var str='';
-        if(companyName){
-            $.each(trList,function(k1,v1){
-                
-                var tdList=$(v1).children()
-                $.each(tdList,function(k2,v2){
-                    
-                    var text='';
-                    if(k1==0){//这个表头的td
-                        if(k2==0){
-                            text=$(v2).text()
-                        }else{
-                            text=','+$(v2).text()
+        var companyName = $("#selectCompany").val();
+        var trList = $("#food table tr");
+        var str = '';
+        if (companyName) {
+            $.each(trList, function (k1, v1) {
+
+                var tdList = $(v1).children()
+                $.each(tdList, function (k2, v2) {
+
+                    var text = '';
+                    if (k1 == 0) { //这个表头的td
+                        if (k2 == 0) {
+                            text = $(v2).text()
+                        } else {
+                            text = ',' + $(v2).text()
                         }
-                    }else{
-                        if(k2==0){
-                            text='\n'+$(v2).text()
-                        }else{
-                            text=','+$(v2).text()
+                    } else {
+                        if (k2 == 0) {
+                            text = '\n' + $(v2).text()
+                        } else {
+                            text = ',' + $(v2).text()
                         }
                     }
-                    str+=text
+                    str += text
                 })
             })
-        }else{
+        } else {
             alert("请选择供应商")
         }
 
         // var str = "栏位1,栏位2,栏位3\n值1,值2,值3";
-        str =  encodeURIComponent(str);
-        aLink.href = "data:text/csv;charset=utf-8,\ufeff"+str;
+        str = encodeURIComponent(str);
+        aLink.href = "data:text/csv;charset=utf-8,\ufeff" + str;
     }
 </script>

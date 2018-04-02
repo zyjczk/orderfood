@@ -1,32 +1,60 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>未定餐统计</title>
-    <link rel="stylesheet" href="/stylesheets/base.css"/>
-    <link rel="stylesheet" href="/stylesheets/login.css"/>
-    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="/css/jquery.toast.min.css"/>
+    <link rel="stylesheet" href="/stylesheets/base.css" />
+    <link rel="stylesheet" href="/stylesheets/login.css" />
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/jquery.toast.min.css" />
     <script src="/js/jquery-1.12.4.min.js"></script>
     <script src="/js/jquery.toast.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/template.js"></script>
 </head>
-<body>
-<input id="employeedata" type="hidden" value="<%=JSON.stringify(allemployee)%>">
-<input id="fooddata" type="hidden" value="<%=JSON.stringify(allfood)%>">
-<div id="food"></div>
 
-<button class='btn btn-success' onclick="sendMessage()"  href="#">通知未订餐人</button>
+<body>
+    <input id="employeedata" type="hidden" value="<%=JSON.stringify(allemployee)%>">
+    <input id="fooddata" type="hidden" value="<%=JSON.stringify(allfood)%>">
+    <div style="margin:15px" id="food"></div>
+
+    <div style="margin:15px" id="remarks">
+        当前发送模板:
+        <br/>
+        <br/>
+        <span id="remarkSpan">
+            <%=remark%>
+        </span>
+        <br/>
+        <br/> 更改新模板:
+        <br/>
+        <textarea type="text" id="remarkInput" rows="3" cols="20" disabled></textarea>
+        <button class="btn btn-primary" onclick="changeRemark(event.target)" id="changeBtn">更改</button>
+        <button style="display:none" class="btn btn-success" id="saveBtn" onclick="changeRemark(event.target)">保存</button>
+        <button id="cancalBtn" style="margin-left:10px;display:none" class="btn btn-defual" onclick="changeRemark(event.target)">取消</button>
+    </div>
+
+    <button style="margin:15px" class='btn btn-success' onclick="sendMessage()" href="#">通知未订餐人</button>
+    
+    <div style="margin:15px">
+        请输入要给全体发送的信息:<br/>
+        <textarea type="text" id="remarkMember" rows="3" cols="20"></textarea>
+        <button style="margin:15px" class='btn btn-success' onclick="sendAllMessage()" href="#">通知全体人员</button>
+    </div>
 </body>
+
 </html>
 
 <script id="foodlist" type="text/html">
     <table class="table table-striped">
         <tr>
+            <td>
+                全选
+                <input type="checkbox" id="selectAll" onclick="selectAll()">
+            </td>
             <td>ID</td>
             <td>姓名</td>
             <td>编号</td>
@@ -34,6 +62,9 @@
         </tr>
         {{each foodList as item key}}
         <tr>
+            <td>
+                <input type="checkbox" name="memberNum" id="{{'memberId' + item['code']}}">
+            </td>
             <td>{{key+1}}</td>
             <td>{{item['name']}}</td>
             <td>{{item['code']}}</td>
@@ -43,33 +74,39 @@
     </table>
 </script>
 
+<script id="remarksData" type="text/html">
+
+</script>
+
 <script>
-    Array.prototype.unique1 = function(){
+    Array.prototype.unique1 = function () {
         var res = [this[0]];
-        for(var i = 1; i < this.length; i++){
+        for (var i = 1; i < this.length; i++) {
             var repeat = false;
-            for(var j = 0; j < res.length; j++){
-                if(this[i] == res[j]){
+            for (var j = 0; j < res.length; j++) {
+                if (this[i] == res[j]) {
                     repeat = true;
                     break;
                 }
             }
-            if(!repeat){
+            if (!repeat) {
                 res.push(this[i]);
             }
         }
         return res;
     }
-    Array.prototype.diff = function(a) {
-        return this.filter(function(i) {return a.indexOf(i) < 0;});
+    Array.prototype.diff = function (a) {
+        return this.filter(function (i) {
+            return a.indexOf(i) < 0;
+        });
     };
     //[1,2].diff([1]);//[2]
     var employee = $.trim($('#employeedata').val());
     var food = $.trim($('#fooddata').val());
-    if(employee){
+    if (employee) {
         var employeedata = JSON.parse(employee);
     }
-    if(food){
+    if (food) {
         var fooddata = JSON.parse(food);
     }
     console.log(employeedata);
@@ -77,10 +114,10 @@
     var arr_employee = [];
     var arr_food = [];
     var finaldata = [];
-    for(var i=0;i<employeedata.length;i++){
+    for (var i = 0; i < employeedata.length; i++) {
         arr_employee.push(employeedata[i]['code']);
     }
-    for(var j=0;j<fooddata.length;j++){
+    for (var j = 0; j < fooddata.length; j++) {
         arr_food.push(fooddata[j]['employeeId']);
     }
 
@@ -88,39 +125,148 @@
     arr_employee = arr_employee.unique1();
     arr_food = arr_food.unique1();
     console.log(arr_employee);
-    console.log('allfood>>',arr_food);
+    console.log('allfood>>', arr_food);
     var minus_arr = arr_employee.diff(arr_food);
-    console.log('差集：',minus_arr);
-    
-    console.log('employeedata',employeedata);
+    console.log('差集：', minus_arr);
+
+    console.log('employeedata', employeedata);
 
 
-        for(var m=0;m<employeedata.length;m++){
+    for (var m = 0; m < employeedata.length; m++) {
 
-            for(var k=0;k<minus_arr.length;k++){
-            if(minus_arr[k] == employeedata[m]['code']){
+        for (var k = 0; k < minus_arr.length; k++) {
+            if (minus_arr[k] == employeedata[m]['code']) {
                 finaldata.push(employeedata[m]);
 
             }
         }
     }
-    console.log(finaldata);
-    var html = template('foodlist',{foodList:finaldata});
+    var html = template('foodlist', {
+        foodList: finaldata
+    });
     $('#food').html(html);
 
-    var memberList=minus_arr
 
-    //测试
-    var sendMessage=function(){
+//通知全体人员
+    var sendAllMessage = function(){
         
-            $.ajax({
-                    url:'/wx/sendmessage',
-                    data:{'memberList':JSON.stringify(memberList)},
-                    method:'post',
-                    success:function(res){
-                        
-                        $.toast({text: "发送成功", position: 'mid-center'});
-                    }
+        var memberList=[];
+        var msg = $("#remarkMember").val();
+        if(msg.length<1){
+            $.toast({
+                text: "请选择要发送的员工",
+                position: 'mid-center'
+            });
+            return 
+        }else{
+            $.each(employeedata, function (k, v) {
+                memberList.push(v.code);
             })
+           
+            $.ajax({
+                url: '/wx/sendmessage',
+                data: {
+                    'memberList': JSON.stringify(memberList),
+                    sendMsg: msg
+                },
+                method: 'post',
+                success: function (res) {
+                    $.toast({
+                        text: "发送成功",
+                        position: 'mid-center'
+                    });
+                }
+            })
+        }
+    }
+
+    //通知未订餐人员
+    var sendMessage = function () {
+
+        var memberList = []; //要发送信息的员工列表
+        var msg = $("#remarkSpan").text();
+        var notOrderList = $("#food input[name='memberNum']:checked"); //所有被选中的员工
+        if (notOrderList.length < 1) {
+            $.toast({
+                text: "请选择要发送的员工",
+                position: 'mid-center'
+            });
+            return 
+        } else {
+            $.each(notOrderList, function (k, v) {
+                memberList.push($(v).attr('id').substring(8));
+            })
+        }
+
+        console.log("结果", memberList, msg)
+
+
+        $.ajax({
+            url: '/wx/sendmessage',
+            data: {
+                'memberList': JSON.stringify(memberList),
+                sendMsg: msg
+            },
+            method: 'post',
+            success: function (res) {
+                $.toast({
+                    text: "发送成功",
+                    position: 'mid-center'
+                });
+            }
+        })
+    }
+
+    var selectAll = function () {
+        if ($("#selectAll")[0].checked) {
+            $("input[name='memberNum']").prop('checked', true);
+        } else {
+            $("input[name='memberNum']").prop('checked', false);
+        }
+    }
+
+    var changeRemark = function (a) {
+
+        if ($(a).attr("id") == "changeBtn") {
+            $("#changeBtn").hide();
+            $("#saveBtn").show();
+            $("#cancalBtn").show();
+            $("#remarkInput").prop('disabled', false)
+        } else if ($(a).attr("id") == "saveBtn") {
+            var text = $("#remarkInput").val();
+            if (text.length > 0) {
+                $.ajax({
+                    url: '/api/saveRemark',
+                    data: {
+                        'text': text
+                    },
+                    method: 'post',
+                    success: function () {
+                        $.ajax({
+                            url: '/api/queryRemark',
+                            method: 'get',
+                            success: function (res) {
+                                
+                                $.toast({
+                                    text: "修改成功",
+                                    position: 'mid-center'
+                                });
+                                $("#changeBtn").show();
+                                $("#saveBtn").hide();
+                                $("#cancalBtn").hide();
+                                $("#remarkInput").prop('disabled', true)
+                                $("#remarkSpan").text(res.list[0].text);
+                            }
+                        })
+
+                    }
+                })
+            }
+        } else {
+            $("#changeBtn").show();
+            $("#saveBtn").hide();
+            $("#cancalBtn").hide();
+            $("#remarkInput").prop('disabled', true)
+        }
     }
 </script>

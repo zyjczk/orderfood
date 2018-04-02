@@ -1,90 +1,109 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>部门订餐人员</title>
-    <link rel="stylesheet" href="/stylesheets/base.css"/>
-    <link rel="stylesheet" href="/stylesheets/login.css"/>
-    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="/css/jquery.toast.min.css"/>
+    <link rel="stylesheet" href="/stylesheets/base.css" />
+    <link rel="stylesheet" href="/stylesheets/login.css" />
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/jquery.toast.min.css" />
     <script src="/js/jquery-1.12.4.min.js"></script>
     <script src="/js/jquery.toast.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/template.js"></script>
 </head>
+
 <body>
     <div class="container">
         <div id="depart">
-           
+
         </div>
         <div id="food">
-            
+
         </div>
-        
+
     </div>
 </body>
+
 </html>
 
 <script id="departList" type="text/html">
     <sqan style="color:red;font-size:24px">请选择查询部门: </sqan>
     <select style="height:30px;margin-left:5px;" name="" id="selectDepart" onchange="selectDepart()">
-            <option value="">请选择</option>
-            {{each departmentList as item  key}}
-                <option value="{{item.code}}">{{item.name}}</option>
-            {{/each}}
+        <option value="">请选择</option>
+        {{each departmentList as item key}}
+        <option value="{{item.code}}">{{item.name}}</option>
+        {{/each}}
     </select>
 </script>
 
-<script id="foodlist" type="text/html">
+<script id="tableBydepartment" type="text/html">
     <table class="table table-striped">
         <tr>
-            <td>部门</td>
-            {{each dataList.foodList as item1  key}}
-            <td>{{item1.name}}</td>
-            {{/each}}
-            <td>合计</td>
+            <th>部门</th>
+            <th>员工姓名</th>
+            <th>员工编号</th>
+            <th>餐品名称</th>
+            <th>餐品编号</th>
+            <th>用餐时间</th>
+            <td>所属时段</td>
         </tr>
-        {{each dataList.orderList as item2  key}}
+        {{each dataList as item key}}
         <tr>
-            <td>{{item2.departName}}</td>
-            {{each dataList.foodList as item3  key}}
-            <td>{{item2[item3.code]||0}}</td>
-            {{/each}}
-            <td>{{item2.sum}}</td>
-        </tr>  
+            <td>{{item.departname}}</td>
+            <td>{{item.employeeName}}</td>
+            <td>{{item.employeeId}}</td>
+            <td>{{item.name}}</td>
+            <td>{{item.foodId}}</td>
+            <td>{{item.orderType==1?'午餐':'晚餐'}}</td>
+            {{if item.weekDay == 'mon'}}
+            <td>周一</td>
+            {{else if item.weekDay == 'tue'}}
+            <td>周二</td>
+            {{else if item.weekDay == 'wed'}}
+            <td>周三</td>
+            {{else if item.weekDay == 'thu'}}
+            <td>周四</td>
+            {{else if item.weekDay == 'fri'}}
+            <td>周五</td>
+            {{else if item.weekDay == 'sat'}}
+            <td>周六</td>
+            {{else if item.weekDay == 'sun'}}
+            <td>周日</td>
+            {{/if}}
+        </tr>
         {{/each}}
-        <tr>
-            <td>合计</td>
-            {{each dataList.foodList as item4  key}}
-            <td style='color:red'>{{dataList.sumAllData[item4.code]||0}}</td>
-            {{/each}}
-            
-            <td style='color:red'>{{dataList.sum}}</td>
-        </tr>
     </table>
 </script>
 
 <script>
-
     $.ajax({
-        url:'/department/query',
-        type:'get',
-        success:function(res){
-            var html = template('departList',{departmentList:res.list});
+        url: '/department/query',
+        type: 'get',
+        success: function (res) {
+            var html = template('departList', {
+                departmentList: res.list
+            });
             $('#depart').html(html);
         }
     })
 
-    function selectDepart(){
-        var selectVal=$("#selectDepart").val()
+    function selectDepart() {
+        var selectVal = $("#selectDepart").val()
         $.ajax({
-            url:'/detail/queryMemberFood?departId='+selectVal,
-            type:'get',
-            success:function(res){
-                debugger;
+            url: '/detail/queryMemberFood?departId=' + selectVal,
+            type: 'get',
+            success: function (res) {
+                console.log(res);
+                if (res.list && res.list.length > 0) {
+                    var html = template('tableBydepartment', {
+                        dataList: res.list
+                    })
+                    $("#food").html(html)
+                }
             }
         })
     }

@@ -12,7 +12,7 @@ var http = require('http');
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3999');//设定的访问端口号
+var port = normalizePort(process.env.PORT || '3999');
 app.set('port', port);
 
 /**

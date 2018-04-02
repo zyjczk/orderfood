@@ -3,6 +3,8 @@ module.exports = {
     // selectOne:'select * from employee where id=?',
     // add:'insert into employee(name,departId,isWorker) values(?,?,?)',
     // edit:'update employee set name=?,departId=?,isWorker=? where id=?',
-    del:'delete from employee where code=?',
-    query:'select * from employee where name=?'
+    del: 'delete from employee where code=?',
+    query: 'select * from employee where name=?',
+    queryById: 'select * from employee where code=?',
+    changeDer: 'update employee set departmentId=? where code=?'
 };

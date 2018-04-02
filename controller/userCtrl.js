@@ -3,7 +3,6 @@ var usermodel = require('../model/userModel');
 var md5 = require('../utils/md5');
 module.exports = {
     logincheck:function(req,res){
-
         pool.getConnection(function(err,connection){
 
             var param = req.body;
@@ -12,7 +11,7 @@ module.exports = {
             // console.log(username);
            //  console.log(passwd);
            // console.log(usermodel.select);
-            //console.log(connection);
+            console.log(passwd);
             connection.query(usermodel.select,[username,passwd],function(err,result){
                // console.log(err);
                // console.log(result);

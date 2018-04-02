@@ -104,5 +104,21 @@ router.get('/ordernot', function(req, res, next) {
     apictrl.notorder(req,res,next);
 
 });
+router.post('/saveRemark',function(req,res,next){
+    apictrl.saveRemark(req,res,next)
+});
+router.get('/queryRemark',function(req,res,next){
+    apictrl.queryRemark(req,res,next)
+});
 
+//历史
+router.post('/keepHistoryFood',function(req,res,next){
+    apictrl.keepHistoryFood(req,res,next);
+
+});
+//历史
+router.get('/findHistoryFood',function(req,res,next){
+    apictrl.findHistoryFood(req,res,next);
+
+});
 module.exports = router;

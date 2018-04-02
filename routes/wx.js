@@ -42,16 +42,20 @@ router.get('/', function(req,res, next){
 /* 获取access_token */
 router.get('/user', function(req,res, next){
     if(req.session.dearUserInfo){
+        console.log('如果有session>>>'+req.session.dearUserInfo);
         fs.readFile('../public/time.txt','utf8', function(err,data){
             //格式：时间戳-时间戳
 
             if(data){
-
+                console.log('如果有时间控制的file数据>>>'+data);
                 var timearr = data.split('-');
                 var start_timestamp = parseInt(timearr[0]);
                 var end_timestamp = parseInt(timearr[1]);
 
                 var current_timestamp = Date.parse(new Date());
+                console.log('开始时间'+start_timestamp);
+                console.log('结束时间'+end_timestamp);
+                console.log('现在时间'+current_timestamp);
                 if((current_timestamp>=start_timestamp) && (current_timestamp<=end_timestamp)){
                     //进入预定页面
                    // res.redirect('https://open.weixin.qq.com/connect/oauth2/authorize?appid='+AppID+'&redirect_uri=http%3a%2f%2fdc.che001.com%2fwx%2fuser&response_type=code&scope=snsapi_userinfo&&agentid='+agentid+'&state=STATE#wechat_redirect');
@@ -62,12 +66,14 @@ router.get('/user', function(req,res, next){
                 }
 
             }else{
+                console.log('没有时间控制的file数据');
                 res.redirect('/wx/nopage?userid='+req.session.dearUserInfo.userid);
             }
         });
 
     }else{
-        // 第二步：通过code换取网页授权access_token
+        // 第二步：通过code换取网页授权access_token、
+        console.log('没有session数据');
         var code = req.query.code;
         console.log('code>>>',code);
         //https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=wwe59cd5608392744f&corpsecret=noA-426ktnwSZQsdIy8dlajESnCloNH46nExmdP7AvM
@@ -112,6 +118,9 @@ router.get('/user', function(req,res, next){
                                                     var end_timestamp = parseInt(timearr[1]);
 
                                                     var current_timestamp = Date.parse(new Date());
+                                                    console.log('开始时间>>>'+start_timestamp);
+                                                    console.log('结束时间>>>'+end_timestamp);
+                                                    console.log('现在时间>>>'+current_timestamp);
                                                     if((current_timestamp>=start_timestamp) && (current_timestamp<=end_timestamp)){
                                                         //进入预定页面
                                                         console.log('进入员工比对~~');
@@ -119,6 +128,7 @@ router.get('/user', function(req,res, next){
 
                                                     }else{
                                                         //res.redirect('/wx/nopage');
+                                                        console.log('时间没到呢~~');
                                                         res.redirect('/wx/nopage?userid='+data3.userid);
                                                     }
 
@@ -164,7 +174,7 @@ router.get('/nopage',function(req,res,next){
     res.render('wx/nopage');
 });
 router.post('/sendmessage', function(req,res, next){
-
+    
     request.get(
         {
             url:'https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid='+AppID+'&corpsecret='+AppSecret
@@ -190,7 +200,7 @@ router.post('/sendmessage', function(req,res, next){
                         "msgtype" : "text",
                         "agentid" : agentid,
                         "text" : {
-                        "content" : "您还未订下周餐食,如需在公司用餐请尽快在工作台中完成订餐"
+                        "content" : param.sendMsg
                     },
                         "safe":0
                     }

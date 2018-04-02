@@ -1,29 +1,36 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><%= title %></title>
-    <link rel="stylesheet" href="/stylesheets/base.css"/>
-    <link rel="stylesheet" href="/stylesheets/login.css"/>
-    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="/css/jquery.toast.min.css"/>
+    <title>
+        <%= title %>
+    </title>
+    <link rel="stylesheet" href="/stylesheets/base.css" />
+    <link rel="stylesheet" href="/stylesheets/login.css" />
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/jquery.toast.min.css" />
     <script src="/js/jquery-1.12.4.min.js"></script>
     <script src="/js/jquery.toast.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/template.js"></script>
 </head>
+
 <body>
     <div class="container">
-        <span>请输入员工姓名: <input type="text" id="name"></span><button style="margin-left:15px" class="btn btn-primary" onclick="query()">查询</button>
-        
+        <span>请输入员工姓名:
+            <input type="text" id="name">
+        </span>
+        <button style="margin-left:15px" class="btn btn-primary" onclick="query()">查询</button>
+
         <div id='list' style="margin-top:20px">
 
         </div>
     </div>
 </body>
+
 </html>
 
 <script id="employeeList" type="text/html">
@@ -31,61 +38,148 @@
         <tr>
             <td>code</td>
             <td>名字</td>
+            <td>所属部门</td>
             <td>操作</td>
         </tr>
-        {{each list as item  key}}
+        {{each list as item key}}
         <tr>
             <td>{{item.code}}</td>
-           
             <td>{{item.name}}</td>
-            <td>
-                <button class="btn btn-danger" onclick=del({{item.code}})>删除</button>  
+            <td id="{{item.code}}">{{item.departmentName}}</td>
+            <td style="display:none" id="select{{item.code}}">
+                <select name="" id="selectDer" onchange="changeDer({{item.code}})">
+                    {{each item.departmentList as derList key}} {{if derList.name==item.departmentName}}
+                    <option selected value="{{derList.code}}">{{derList.name}}</option>
+                    {{else}}
+                    <option value="{{derList.code}}">{{derList.name}}</option>
+                    {{/if}} {{/each}}
+                </select>
             </td>
-        </tr>  
+            <td>
+                <button class="btn btn-danger" onclick=del({{item.code}})>删除</button>
+                <button class="btn btn-danger" onclick=showSelectDer({{item.code}})>修改所属部门</button>
+            </td>
+        </tr>
         {{/each}}
     </table>
 </script>
 
 <script>
-    function del(code){
+    //查询部门列表
+    var departmentList; //存储部门列表
 
+    function queryDer() {
+        $.ajax({
+            url: '/department/list?type=2',
+            success: function (res) {
+                departmentList = res.list
+            }
+        })
+    }
+    queryDer()
+
+    //删除人员
+    function del(code) {
         var status = confirm('确定要删除这条数据么？');
-        if(status){
+        if (status) {
             $.ajax({
-                url:'/employee/delAction?code='+code,
-                success:function(data){
-                    if(data['msg'] == 'success'){
+                url: '/employee/delAction?code=' + code,
+                success: function (data) {
+                    if (data['msg'] == 'success') {
                         //删除成功
-                        $.toast({text:"删除成功", position : 'mid-center'});
-                       setTimeout(function(){
-                           location.href = '/employee/emlist';
-                       },1000);
+                        $.toast({
+                            text: "删除成功",
+                            position: 'mid-center'
+                        });
+                        setTimeout(function () {
+                            location.href = '/employee/emlist';
+                        }, 1000);
                     }
                 },
-                error:function(){
-                    $.toast({text:"删除失败", position : 'mid-center'});
+                error: function () {
+                    $.toast({
+                        text: "删除失败",
+                        position: 'mid-center'
+                    });
                 }
             });
         }
     }
-    function query(){
-        var name=$("#name").val();
-        if(name){
+
+    //姓名查询人员
+    function query() {
+        var name = $("#name").val();
+        if (name) {
             $.ajax({
-                url:'/employee/query?name='+name,
-                success:function(data){
-                    
-                    if(data && data.list && data.list.length>0){
-                        var html=template('employeeList',{list:data.list})                      
-                        $('#list').html(html);
-                    }else{
-                        $.toast({text:"未查到相关人员", position : 'mid-center'});
+                url: '/employee/query?name=' + name,
+                success: function (data) {
+
+                    if (data && data.list && data.list.length > 0) {
+                        if (departmentList) {
+                            for (i = 0; i < departmentList.length; i++) {
+                                for (k = 0; k < data.list.length; k++) {
+                                    if (departmentList[i].code == data.list[k].departmentId) {
+                                        data.list[k].departmentName = departmentList[i].name
+                                        data.list[k].departmentList = departmentList
+                                    }
+                                }
+                            }
+                            var html = template('employeeList', {
+                                list: data.list
+                            })
+                            $('#list').html(html);
+                        } else {
+                            $.toast({
+                                text: "未查到部门列表数据",
+                                position: 'mid-center'
+                            });
+                        }
+                    } else {
+                        $.toast({
+                            text: "未查到相关人员",
+                            position: 'mid-center'
+                        });
                     }
                 },
-                error:function(){
-                    $.toast({text:"未查到相关人员", position : 'mid-center'});
+                error: function () {
+                    $.toast({
+                        text: "未查到相关人员",
+                        position: 'mid-center'
+                    });
                 }
             })
         }
+    }
+
+    //显示修改所属部门
+    function showSelectDer(id) {
+        $("#" + id).hide();
+        $("#select" + id).show()
+    }
+
+    //修改所属部门
+    function changeDer(id) {
+        var departmentId = $("#selectDer").val();
+        if (departmentId) {
+            $.ajax({
+                url: '/employee/changeDer?code=' + id + '&departmentId=' + departmentId,
+                success: function (res) {
+                    if (res.msg == 'success') {
+                        $.toast({
+                            text: "修改成功",
+                            position: 'mid-center'
+                        });
+                        query()
+                    } else {
+                        $.toast({
+                            text: "修改失败联系吕毅",
+                            position: 'mid-center'
+                        });
+                    }
+
+                }
+            })
+        }
+
     }
 </script>
